@@ -8,7 +8,7 @@ use errors::Result;
 use log::debug;
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 
-const REPO_LIMIT: usize = 10;
+const REPO_LIMIT: usize = 10_000;
 
 pub struct Scraper {
     github_username: String,
