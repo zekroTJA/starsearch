@@ -1,0 +1,11 @@
+volumes:
+  meilisearch:
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch
+    volumes:
+      - "meilisearch:/meili_data"
+    environment:
+      MEILI_ENV: development
+    network_mode: host

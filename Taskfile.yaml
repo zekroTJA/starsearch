@@ -1,0 +1,18 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  dev-env-up:
+    aliases: [dev-env]
+    cmds:
+      - docker compose -f docker-compose.dev.yml up -d
+
+  dev-env-down:
+    cmds:
+      - docker compose -f docker-compose.dev.yml up down
+
+  docker-compose:
+    aliases: [dc]
+    cmds:
+      - docker compose -f docker-compose.dev.yml {{.CLI_ARGS}}
