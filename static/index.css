@@ -1,10 +1,129 @@
+@import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;800&display=swap");
+
+:root {
+  --c-background: #0c0c0c;
+  --c-background-2: #70002054;
+  --c-background-3: #70002080;
+  --c-text: #efefef;
+  --c-accent: #f00046;
+  --c-accent-background: #700020;
+}
+
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    padding: 1em;
-    background-color: black;
-    color: white;
+  margin: 0;
+  padding: 1em;
+  background-color: var(--c-background);
+  color: var(--c-text);
+  font-family: "Golos Text", sans-serif;
+  max-width: 55em;
+  margin: 0 auto;
+  height: 100vh;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+input,
+button {
+  background-color: var(--c-accent-background);
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  padding: 0.5em;
+  color: inherit;
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input:focus {
+  outline: solid 2px var(--c-accent);
+}
+
+#header {
+  width: 100%;
+  display: flex;
+  gap: 0.5em;
+  justify-content: center;
+}
+
+#input-language {
+  max-width: 20ch;
+}
+
+#header > input {
+  width: 100%;
+}
+
+#results {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  margin-top: 1em;
+  overflow: scroll;
+  height: 100%;
+  padding: 0 0 4em 0;
+}
+
+#result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  background-color: var(--c-background-2);
+  padding: 0.8em;
+  border-radius: 8px;
+}
+
+#result:hover {
+  background-color: var(--c-background-3);
+}
+
+#no-results {
+  width: 100%;
+  text-align: center;
+  margin-top: 3em;
+  opacity: 0.75;
+}
+
+.language-ident {
+  display: flex;
+  gap: 0.3em;
+  align-items: center;
+  color: #afafaf;
+}
+
+.language-ident > div {
+  height: 0.8em;
+  width: 0.8em;
+  border-radius: 100%;
+}
+
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.topic {
+  padding: 0.2em 0.4em;
+  border-radius: 0.8em;
+  background-color: #ffffff22;
 }

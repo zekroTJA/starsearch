@@ -1,7 +1,49 @@
-<!DOCTYPE html>
 <html>
-    <header>
-        <title>{{title}}</title>
-        <link rel="stylesheet" href="/static/index.css" />
-    </header>
+  <header>
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/static/index.css" />
+    <link rel="stylesheet" href="https://languages.ranna.dev/languages.bg.css" />
+  </header>
+  <body>
+    <div id="header">
+      <input id="input-query" type="text" placeholder="Search ..." value="{{query}}" />
+      <input
+        id="input-language"
+        type="text"
+        placeholder="Language Filter"
+        value="{{language_filter}}"
+      />
+      <button id="button-search">Search</button>
+    </div>
+    <div id="results">
+      {{#if results}}
+        {{#each results}}
+          <a id="result" href="{{this.url}}" target="_blank">
+            <h3>{{this.owner}} / {{this.name}}</h3>
+            <div>{{this.description}}</div>
+            {{#if this.topics}}
+              <div class="topics">
+                {{#each this.topics}}
+                  <div class="topic">
+                    {{this}}
+                  </div>
+                {{/each}}
+              </div>
+            {{/if}}
+            {{#if this.language}}
+              <div class="language-ident">
+                <div class="lang-color-bg" srclang="{{this.language_id}}"></div>
+                <span>{{this.language}}</span>
+              </div>
+            {{/if}}
+          </a>
+        {{/each}}
+      {{else}}
+        <div id="no-results">
+          <span><i>No results found.</i> 😟</span>
+        </div>
+      {{/if}}
+    </div>
+  </body>
+  <script src="/static/index.js"></script>
 </html>
