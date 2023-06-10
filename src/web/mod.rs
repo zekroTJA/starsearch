@@ -1,10 +1,7 @@
 mod models;
 
 use crate::db::Database;
-use rocket::{
-    fs::{relative, FileServer},
-    State,
-};
+use rocket::{fs::FileServer, Config, State};
 use rocket_dyn_templates::{context, Template};
 use std::sync::Arc;
 
@@ -29,7 +26,6 @@ async fn index(
     Template::render(
         "index",
         context! {
-            title: "test title",
             query: query.unwrap_or_default(),
             language_filter: language,
             results: res,
@@ -41,7 +37,8 @@ pub async fn run(db: Arc<Database>) -> Result<(), rocket::Error> {
     rocket::build()
         .manage(db)
         .mount("/", routes![index])
-        .mount("/static", FileServer::from(relative!("static")))
+        .mount("/static", FileServer::from("static"))
+        .configure(Config::figment())
         .attach(Template::fairing())
         .launch()
         .await?;
