@@ -9,6 +9,7 @@ RUN cargo build --release
 
 FROM debian:stable-slim
 WORKDIR /app
+RUN apt-get update && apt-get install -y ca-certificates
 COPY static static
 COPY templates templates
 COPY --from=build /build/target/release/starsearch .
