@@ -1,8 +1,13 @@
 <html>
   <header>
-    <title>{{title}}</title>
+    <title>
+      starsearch
+      {{#if query}}: {{query}}{{/if}}
+      {{#if language_filter}}({{language_filter}}){{/if}}
+    </title>
     <link rel="stylesheet" href="/static/index.css" />
     <link rel="stylesheet" href="https://languages.ranna.dev/languages.bg.css" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   </header>
   <body>
     <div id="header">

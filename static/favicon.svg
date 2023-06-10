@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g transform="matrix(0.211391,0,0,0.211391,-36.3473,-56.6499)">
+        <rect id="Artboard1" x="171.943" y="267.986" width="302.756" height="302.756" style="fill:none;"/>
+        <g id="Artboard11" serif:id="Artboard1">
+            <g transform="matrix(1.3759,0,0,1.3759,-109.341,-145.443)">
+                <g transform="matrix(3.9604,0,0,3.9604,252.52,350.283)">
+                    <path d="M8.243,7.34L1.863,8.265L1.75,8.288C1.313,8.404 1.007,8.802 1.007,9.255C1.007,9.525 1.116,9.784 1.31,9.972L5.932,14.471L4.842,20.826L4.829,20.936C4.828,20.956 4.827,20.975 4.827,20.995C4.827,21.544 5.279,21.995 5.827,21.995C5.99,21.995 6.149,21.956 6.293,21.88L11.999,18.88L17.692,21.88L17.792,21.926C17.909,21.972 18.033,21.996 18.158,21.996C18.707,21.996 19.158,21.544 19.158,20.996C19.158,20.939 19.154,20.882 19.144,20.826L18.053,14.471L22.677,9.971L22.755,9.886C22.9,9.708 22.979,9.485 22.979,9.256C22.979,8.761 22.612,8.337 22.122,8.266L15.742,7.34L12.89,1.56C12.722,1.219 12.373,1.002 11.993,1.002C11.613,1.002 11.264,1.219 11.096,1.56L8.243,7.34Z" style="fill:rgb(255,165,0);fill-rule:nonzero;"/>
+                </g>
+                <g transform="matrix(2.2588,0,0,2.2588,-547.343,-729.269)">
+                    <g transform="matrix(4.73057,0,0,4.73057,328.687,451.747)">
+                        <path d="M3,10C3,13.84 6.16,17 10,17C13.84,17 17,13.84 17,10C17,6.16 13.84,3 10,3C6.16,3 3,6.16 3,10" style="fill:none;fill-rule:nonzero;stroke:rgb(0,119,255);stroke-width:1.62px;"/>
+                    </g>
+                    <g transform="matrix(4.73057,0,0,4.73057,328.687,451.747)">
+                        <path d="M19.341,19.341L15,15" style="fill:none;fill-rule:nonzero;stroke:rgb(0,119,255);stroke-width:1.62px;"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
