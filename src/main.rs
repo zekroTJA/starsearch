@@ -1,74 +1,17 @@
 mod config;
 mod db;
 mod scraper;
+mod web;
 
 use config::Config;
 use db::Database;
 use env_logger::Env;
-use rocket::{
-    fs::{relative, FileServer},
-    State,
-};
-use rocket_dyn_templates::{context, Template};
-use scraper::{models::Repository, Scraper};
-use serde::Serialize;
+use scraper::Scraper;
 use std::{sync::Arc, time::Duration};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 #[macro_use]
 extern crate rocket;
-
-#[derive(Serialize)]
-struct RepositoryViewModel<'a> {
-    pub name: &'a str,
-    pub owner: &'a str,
-    pub url: &'a str,
-    pub description: &'a Option<String>,
-    pub language: &'a Option<String>,
-    pub language_id: Option<String>,
-    pub topics: &'a Option<Vec<String>>,
-}
-
-impl<'a> From<&'a Repository> for RepositoryViewModel<'a> {
-    fn from(value: &'a Repository) -> Self {
-        Self {
-            name: &value.name,
-            description: &value.description,
-            language: &value.language,
-            language_id: value.language.as_ref().map(|v| v.to_lowercase()),
-            owner: &value.owner.login,
-            url: &value.html_url,
-            topics: &value.topics,
-        }
-    }
-}
-
-#[get("/?<query>&<limit>&<language>")]
-async fn index(
-    db: &State<Arc<Database>>,
-    query: Option<&str>,
-    limit: Option<usize>,
-    language: Option<&str>,
-) -> Template {
-    let res = if let Some(query) = query {
-        db.search(query, limit.unwrap_or(30), language).await
-    } else {
-        db.list(limit.unwrap_or(30), language).await
-    }
-    .unwrap();
-
-    let res: Vec<_> = res.iter().map(RepositoryViewModel::from).collect();
-
-    Template::render(
-        "index",
-        context! {
-            title: "test title",
-            query: query.unwrap_or_default(),
-            language_filter: language,
-            results: res,
-        },
-    )
-}
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
@@ -115,15 +58,7 @@ async fn main() -> Result<(), rocket::Error> {
         });
     }
 
-    rocket::build()
-        .manage(db)
-        .mount("/", routes![index])
-        .mount("/static", FileServer::from(relative!("static")))
-        .attach(Template::fairing())
-        .launch()
-        .await?;
-
-    Ok(())
+    web::run(db).await
 }
 
 async fn scrape(scraper: Arc<Scraper>, db: Arc<Database>) {

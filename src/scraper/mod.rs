@@ -6,7 +6,10 @@ use crate::scraper::models::ContentEntry;
 use self::models::Repository;
 use errors::Result;
 use log::debug;
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
+use reqwest::{
+    header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT},
+    IntoUrl,
+};
 
 const REPO_LIMIT: usize = 10_000;
 
@@ -76,21 +79,31 @@ impl Scraper {
         Ok(repos)
     }
 
+    pub async fn get_file_contents<U: IntoUrl>(&self, url: U) -> Result<Option<String>> {
+        let res = self.client.get(url).send().await?;
+
+        let res = if res.status().is_success() {
+            Some(res.text().await?)
+        } else {
+            None
+        };
+
+        Ok(res)
+    }
+
     pub async fn get_readme_content(&self, owner: &str, repo: &str) -> Result<Option<String>> {
         // First, try the default path for READMEs. This should match like 95% of the cases
         // so we can save some API calls.
         debug!("Trying to get README.md content for {owner}/{repo}...");
         let res = self
-            .client
-            .get(format!(
+            .get_file_contents(format!(
                 "https://raw.githubusercontent.com/{owner}/{repo}/master/README.md"
             ))
-            .send()
             .await?;
 
-        if res.status().is_success() {
+        if let Some(res) = res {
             debug!("Found README.md for {owner}/{repo}");
-            return Ok(Some(res.text().await?));
+            return Ok(Some(res));
         }
 
         debug!("Fetching repository contents for {owner}/{repo} ...");
@@ -112,9 +125,9 @@ impl Scraper {
 
         if let Some(download_url) = readme_entry.and_then(|v| v.download_url.as_ref()) {
             debug!("Downloading README for {owner}/{repo} ...");
-            let res = self.client.get(download_url).send().await?;
-            if res.status().is_success() {
-                return Ok(Some(res.text().await?));
+            let res = self.get_file_contents(download_url).await?;
+            if let Some(res) = res {
+                return Ok(Some(res));
             }
         }
 
