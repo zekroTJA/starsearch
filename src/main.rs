@@ -13,6 +13,8 @@ use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 #[macro_use]
 extern crate rocket;
 
+const DEFAULT_SCRAPE_INTERVAL: u64 = 3600 * 12;
+
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
     dotenv::dotenv().ok();
@@ -32,9 +34,14 @@ async fn main() -> Result<(), rocket::Error> {
         .expect("failed constructing scraper");
     let scraper = Arc::new(scraper);
 
-    schedule_scraping(scraper.clone(), db.clone())
-        .await
-        .expect("failed scheduling scraping job");
+    schedule_scraping(
+        scraper.clone(),
+        db.clone(),
+        cfg.scrape_interval_seconds
+            .unwrap_or(DEFAULT_SCRAPE_INTERVAL),
+    )
+    .await
+    .expect("failed scheduling scraping job");
 
     if !cfg.skip_initial_scrape.is_some_and(|v| v) {
         info!("Starting initial scraping ...");
@@ -59,10 +66,11 @@ async fn scrape(scraper: Arc<Scraper>, db: Arc<Database>) {
 async fn schedule_scraping(
     scraper: Arc<Scraper>,
     db: Arc<Database>,
+    interval_seconds: u64,
 ) -> Result<(), JobSchedulerError> {
     let sched = JobScheduler::new().await?;
 
-    let job = Job::new_repeated_async(Duration::from_secs(3600), move |_uuid, _l| {
+    let job = Job::new_repeated_async(Duration::from_secs(interval_seconds), move |_uuid, _l| {
         let scraper = scraper.clone();
         let db = db.clone();
         Box::pin(async move {

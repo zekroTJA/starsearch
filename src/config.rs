@@ -8,6 +8,7 @@ pub struct Config {
     pub meilisearch_url: String,
     pub meilisearch_apikey: Option<String>,
     pub skip_initial_scrape: Option<bool>,
+    pub scrape_interval_seconds: Option<u64>,
 }
 
 impl Config {
