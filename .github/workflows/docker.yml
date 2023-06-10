@@ -30,9 +30,6 @@ jobs:
       - if: startsWith(github.ref, 'refs/heads/master')
         run: echo "TAG=latest" >> $GITHUB_ENV
 
-      - if: startsWith(github.ref, 'refs/heads/dev')
-        run: echo "TAG=canary" >> $GITHUB_ENV
-
       - if: startsWith(github.ref, 'refs/tags')
         run: |
           echo "TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
