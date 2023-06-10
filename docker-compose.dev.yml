@@ -8,4 +8,5 @@ services:
       - "meilisearch:/meili_data"
     environment:
       MEILI_ENV: development
-    network_mode: host
+    ports:
+      - 7700:7700
