@@ -7,6 +7,7 @@ pub struct Config {
     pub github_apitoken: Option<String>,
     pub meilisearch_url: String,
     pub meilisearch_apikey: Option<String>,
+    pub skip_initial_scrape: Option<bool>,
 }
 
 impl Config {

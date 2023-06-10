@@ -35,10 +35,10 @@ async fn main() -> Result<(), rocket::Error> {
 
     let cfg = Config::parse().expect("failed parsing config");
 
-    let db = Arc::new(Database::new(
-        &cfg.meilisearch_url,
-        cfg.meilisearch_apikey.as_ref(),
-    ));
+    let db = Database::new(&cfg.meilisearch_url, cfg.meilisearch_apikey.as_ref())
+        .await
+        .expect("failed creating database connection");
+    let db = Arc::new(db);
     let scraper = Arc::new(
         Scraper::new(cfg.github_username, cfg.github_apitoken)
             .expect("failed constructing scraper"),
@@ -62,18 +62,25 @@ async fn main() -> Result<(), rocket::Error> {
 
     sched.start().await.expect("failed starting scheduler");
 
-    let scraper = scraper.clone();
-    let db = db.clone();
-    rocket::tokio::spawn(async move {
-        scrape(scraper, db).await;
-    });
+    if !cfg.skip_initial_scrape.is_some_and(|v| v) {
+        let scraper = scraper.clone();
+        let db = db.clone();
+        rocket::tokio::spawn(async move {
+            scrape(scraper, db).await;
+        });
+    }
 
-    rocket::build()
-        .mount("/", routes![index])
-        .mount("/static", FileServer::from(relative!("static")))
-        .attach(Template::fairing())
-        .launch()
-        .await?;
+    let res = db.search("arg parser", None).await.unwrap();
+    // let res = db.search("arg parser", Some("go")).await.unwrap();
+    let v: Vec<_> = res.iter().map(|v| &v.full_name).collect();
+    dbg!(v);
+
+    // rocket::build()
+    //     .mount("/", routes![index])
+    //     .mount("/static", FileServer::from(relative!("static")))
+    //     .attach(Template::fairing())
+    //     .launch()
+    //     .await?;
 
     Ok(())
 }
