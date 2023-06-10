@@ -15,8 +15,20 @@ services:
       - 8000:8000
     restart: unless-stopped
     environment:
+      # Logger configuration
       RUST_LOG: info,hyper=warn,isahc=warn,handlebars=warn
+      # The address of your meilisearch instance. In this case, it
+      # is included in this stack, so leave this as-is.
       SS_MEILISEARCH_URL: http://meilisearch:7700
+      # The name of the GitHub user whose starred repositories shall
+      # be scraped.
       SS_GITHUB_USERNAME: zekroTJA
-      SS_GITHUB_APITOKEN: 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
+      # A GitHub API token. This is not necessarily required, but with
+      # a larger ammount of repositories to be scraped, you will run into
+      # rate limiting issues without using an API token.
+      # You can obtain a token from here:
+      # https://github.com/settings/personal-access-tokens
+      SS_GITHUB_APITOKEN: <your GitHub API token>
+      # Set this to true to disable scraping your starred repositories
+      # on application startup.
       SS_SKIP_INITIAL_SCRAPE: true
