@@ -125,6 +125,8 @@ impl Scraper {
     pub async fn run(&self) -> Result<Vec<Repository>> {
         let mut repos = self.get_starred_repos().await?;
 
+        repos.retain(|r| !r.disabled);
+
         for repository in repos.iter_mut() {
             let readme_content = self
                 .get_readme_content(&repository.owner.login, &repository.name)
