@@ -3,6 +3,18 @@
 version: "3"
 
 tasks:
+  default:
+    cmds:
+      - task: run
+
+  run:
+    cmds:
+      - cargo run
+
+  release:
+    cmds:
+      - cargo build --release
+
   dev-env-up:
     aliases: [dev-env]
     cmds:
