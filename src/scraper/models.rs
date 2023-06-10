@@ -10,6 +10,7 @@ pub struct Repository {
     pub description: Option<String>,
     pub fork: bool,
     pub url: String,
+    pub html_url: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub language: Option<String>,

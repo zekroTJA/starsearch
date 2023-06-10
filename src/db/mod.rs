@@ -1,14 +1,8 @@
 pub mod errors;
 
-use errors::Result;
-use meilisearch_sdk::{
-    errors::{ErrorCode, MeilisearchError},
-    search::SearchResult,
-    settings::Settings,
-    Client,
-};
-
 use crate::scraper::models::Repository;
+use errors::Result;
+use meilisearch_sdk::{documents::DocumentsQuery, errors::ErrorCode, Client};
 
 pub struct Database {
     client: Client,
@@ -69,7 +63,12 @@ impl Database {
         Ok(())
     }
 
-    pub async fn search(&self, query: &str, language: Option<&str>) -> Result<Vec<Repository>> {
+    pub async fn search(
+        &self,
+        query: &str,
+        limit: usize,
+        language: Option<&str>,
+    ) -> Result<Vec<Repository>> {
         let idx = self.client.index("repositories");
 
         let mut search = idx.search();
@@ -81,6 +80,7 @@ impl Database {
         search.with_filter(&filter);
 
         let res: Vec<_> = search
+            .with_limit(limit)
             .execute::<Repository>()
             .await?
             .hits
@@ -88,6 +88,23 @@ impl Database {
             .map(|r| &r.result)
             .cloned()
             .collect();
+
+        Ok(res)
+    }
+
+    pub async fn list(&self, limit: usize, language: Option<&str>) -> Result<Vec<Repository>> {
+        let idx = self.client.index("repositories");
+
+        let filter = language
+            .map(|v| format!("language = {v}"))
+            .unwrap_or_else(|| "".into());
+
+        let res = DocumentsQuery::new(&idx)
+            .with_filter(&filter)
+            .with_limit(limit)
+            .execute()
+            .await?
+            .results;
 
         Ok(res)
     }
