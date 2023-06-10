@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Repository {
     pub id: u32,
     pub name: String,
@@ -16,9 +16,10 @@ pub struct Repository {
     pub license: Option<License>,
     pub topics: Option<Vec<String>>,
     pub readme_content: Option<String>,
+    pub disabled: bool,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct License {
     pub key: Option<String>,
     pub spdx_id: Option<String>,
@@ -26,7 +27,7 @@ pub struct License {
     pub url: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct User {
     pub id: u32,
     pub login: String,
