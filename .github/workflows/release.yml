@@ -15,8 +15,10 @@ jobs:
           # Linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
+            flags: --features static_ssl
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
+            flags: --features static_ssl
 
           # Darwin
           - os: macos-latest
@@ -50,7 +52,7 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --release --bin cli --target ${{ matrix.target }}
+          args: --release --bin cli --target ${{ matrix.target }} ${{ matrix.flags }}
 
       - name: Rename Artifacts
         shell: bash
