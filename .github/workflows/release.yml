@@ -43,10 +43,6 @@ jobs:
           target: ${{ matrix.target }}
           toolchain: nightly
 
-      - name: Install libssl-dev
-        run: sudo apt-get install -y openssl pkg-config libssl-dev
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-
       - name: Build
         uses: actions-rs/cargo@v1
         with:
