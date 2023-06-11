@@ -41,6 +41,10 @@ jobs:
           target: ${{ matrix.target }}
           toolchain: nightly
 
+      - name: Install libssl-dev
+        run: sudo apt-get install -y openssl pkg-config libssl-dev
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:
@@ -55,10 +59,6 @@ jobs:
           ASSET_PATH=cli-$ver-${{ matrix.target }}${{ matrix.ext }}
           mv target/${{ matrix.target }}/release/cli $ASSET_PATH
           echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
-
-      - name: Install libssl-dev
-        run: apt-get install pkg-config libssl-dev
-        if: ${{ matrix.os == "ubuntu-latest" }}
 
       - name: Release
         uses: softprops/action-gh-release@v1
