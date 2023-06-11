@@ -25,3 +25,16 @@ impl<'a> From<&'a Repository> for RepositoryViewModel<'a> {
         }
     }
 }
+
+#[derive(Serialize)]
+pub struct Error {
+    pub message: String,
+}
+
+impl<E: ToString> From<E> for Error {
+    fn from(value: E) -> Self {
+        Self {
+            message: value.to_string(),
+        }
+    }
+}
