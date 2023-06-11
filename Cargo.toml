@@ -7,15 +7,25 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4.26", features = ["serde"] }
+clap = { version = "4.3.3", features = ["derive", "env"] }
+console = "0.15.7"
 dotenv = "0.15.0"
 env_logger = "0.10.0"
 figment = { version = "0.10.10", features = ["env"] }
 log = "0.4.18"
 meilisearch-sdk = "0.24.0"
-reqwest = { version = "0.11.18", features = ["default-tls", "tokio-native-tls", "json"] }
+reqwest = { version = "0.11.18", features = ["default-tls", "tokio-native-tls", "json", "blocking"] }
 rocket = { version = "0.5.0-rc.3", features = ["json"] }
 rocket-static-files = "0.1.0"
 rocket_dyn_templates = { version = "0.1.0-rc.3", features = ["handlebars"] }
 serde = { version = "1.0.164", features = ["derive"] }
 thiserror = "1.0.40"
 tokio-cron-scheduler = "0.9.4"
+
+[[bin]]
+name = "starsearch"
+path = "src/main.rs"
+
+[[bin]]
+name = "cli"
+path = "src/main_cli.rs"

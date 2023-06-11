@@ -9,7 +9,7 @@ tasks:
 
   run:
     cmds:
-      - cargo run
+      - cargo run --bin starsearch
 
   release:
     cmds:
