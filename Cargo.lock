@@ -2406,7 +2406,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "starsearch"
+name = "starsearch-backend"
 version = "0.1.0"
 dependencies = [
  "chrono",
