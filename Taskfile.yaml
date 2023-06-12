@@ -7,24 +7,36 @@ tasks:
     cmds:
       - task: run
 
-  run:
+  run-server:
+    desc: Cargo run the backend server.
+    aliases: [run]
     cmds:
       - cargo run -p starsearch-server
 
+  run-cli:
+    desc: Cargo run the CLI.
+    aliases: [cli]
+    cmds:
+      - cargo run -p starsearch-cli {{.CLI_ARGS}}
+
   release:
+    desc: Build the project binaries in release mode.
     cmds:
       - cargo build --release
 
   dev-env-up:
+    desc: Spin up development environment containers.
     aliases: [dev-env]
     cmds:
       - docker compose -f docker-compose.dev.yml up -d
 
   dev-env-down:
+    desc: Shut down development environment containers.
     cmds:
       - docker compose -f docker-compose.dev.yml up down
 
   docker-compose:
+    desc: Run docker compose commands on the development environment stack.
     aliases: [dc]
     cmds:
       - docker compose -f docker-compose.dev.yml {{.CLI_ARGS}}
