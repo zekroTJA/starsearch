@@ -25,6 +25,10 @@ struct Args {
     #[arg(short = 'n', long, default_value_t = 5)]
     limit: usize,
 
+    /// Display results in codensed mode.
+    #[arg(short, long, default_value_t = false)]
+    condensed: bool,
+
     /// The starsearch API endpoint.
     #[arg(short, long, env = "STARSEARCH_ENDPOINT")]
     endpoint: Option<String>,
@@ -77,7 +81,13 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         style("results:").dim()
     );
 
-    res.iter().for_each(|v| v.print_short(&color_map));
+    res.iter().for_each(|v| {
+        if args.condensed {
+            v.print_condensed(&color_map)
+        } else {
+            v.print_short(&color_map)
+        }
+    });
 
     Ok(())
 }
@@ -99,11 +109,34 @@ fn get_color_map() -> Result<LanguageMap, reqwest::Error> {
 
 trait Printer {
     fn print_short(&self, color_map: &Option<LanguageMap>);
+    fn print_condensed(&self, color_map: &Option<LanguageMap>);
 }
 
 impl Printer for Repository {
+    fn print_condensed(&self, color_map: &Option<LanguageMap>) {
+        if let Some(language) = &self.language {
+            let clr = color_map
+                .as_ref()
+                .and_then(|v| v.get(&language.to_lowercase()));
+            if let Some(clr) = clr {
+                print!("\x1b[38;2;{};{};{}m⬤\x1b[0m ", clr.0, clr.1, clr.2,);
+            } else {
+                print!("⬤ ");
+            }
+        } else {
+            print!("  ");
+        }
+
+        print!("{}", style(&self.html_url).cyan().underlined().bold());
+
+        if let Some(description) = &self.description {
+            print!(" - {}", description);
+        }
+
+        println!();
+    }
+
     fn print_short(&self, color_map: &Option<LanguageMap>) {
-        // "\x1b[38;2;255;255;0mHello"
         println!();
 
         println!(
@@ -121,7 +154,7 @@ impl Printer for Repository {
 
         if let Some(topics) = &self.topics {
             if !topics.is_empty() {
-                println!("{}", style(topics.join(", ")).dim());
+                println!("{}", style(cap(topics, 8).join(", ")).dim());
             }
         }
 
@@ -139,6 +172,18 @@ impl Printer for Repository {
             }
         }
     }
+}
+
+fn cap(v: &[String], max: usize) -> Vec<String> {
+    if v.len() < max {
+        return v.to_vec();
+    }
+
+    return v[..max]
+        .iter()
+        .cloned()
+        .chain(["...".to_string()])
+        .collect();
 }
 
 fn main() {
