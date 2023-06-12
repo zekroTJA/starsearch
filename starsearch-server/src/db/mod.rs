@@ -1,8 +1,8 @@
 pub mod errors;
 
-use crate::scraper::models::Repository;
 use errors::Result;
 use meilisearch_sdk::{documents::DocumentsQuery, errors::ErrorCode, Client};
+use starsearch_sdk::models::Repository;
 
 pub struct Database {
     client: Client,

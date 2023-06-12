@@ -1,5 +1,5 @@
-use crate::scraper::models::Repository;
 use serde::Serialize;
+use starsearch_sdk::models::Repository;
 
 #[derive(Serialize)]
 pub struct RepositoryViewModel<'a> {

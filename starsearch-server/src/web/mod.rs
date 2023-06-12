@@ -2,9 +2,10 @@ mod catchers;
 mod models;
 
 use self::models::RepositoryViewModel;
-use crate::{db::Database, scraper::models::Repository};
+use crate::db::Database;
 use rocket::{fs::FileServer, serde::json::Json, Config, State};
 use rocket_dyn_templates::{context, Template};
+use starsearch_sdk::models::Repository;
 use std::sync::Arc;
 
 #[get("/?<query>&<limit>&<language>")]

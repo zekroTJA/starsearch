@@ -1,9 +1,9 @@
 use thiserror::Error;
 
-pub type Result<T, E = ScraperError> = core::result::Result<T, E>;
+pub type Result<T, E = Error> = core::result::Result<T, E>;
 
 #[derive(Error, Debug)]
-pub enum ScraperError {
+pub enum Error {
     #[error("request failed: {0}")]
     RequestError(#[from] reqwest::Error),
 }

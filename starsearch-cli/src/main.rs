@@ -1,14 +1,13 @@
 #![allow(dead_code)]
 
-mod errors;
 mod models;
 
 use self::models::Language;
-use crate::scraper::models::Repository;
 use clap::Parser;
 use console::style;
-use errors::Result;
-use std::collections::HashMap;
+use models::LanguageMap;
+use starsearch_sdk::{client::Client, models::Repository};
+use std::{collections::HashMap, error::Error, process::exit};
 
 const LANGUAGE_COLORS_ENDPOINT: &str = "https://languages.ranna.dev/languages.minified.json";
 
@@ -31,7 +30,7 @@ struct Args {
     endpoint: Option<String>,
 }
 
-pub fn run() -> Result<()> {
+pub fn run() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
     let Some(endpoint) = args.endpoint else {
@@ -50,7 +49,9 @@ pub fn run() -> Result<()> {
         return Ok(());
     };
 
-    let res = search(&endpoint, &args.query, args.lang.as_deref(), args.limit)?;
+    let client = Client::new(endpoint);
+
+    let res = client.search(&args.query, args.lang.as_deref(), args.limit)?;
 
     if res.is_empty() {
         println!("No results have been found. :(");
@@ -81,7 +82,7 @@ pub fn run() -> Result<()> {
     Ok(())
 }
 
-fn get_color_map() -> Result<HashMap<String, (u8, u8, u8)>> {
+fn get_color_map() -> Result<LanguageMap, reqwest::Error> {
     let res: HashMap<String, Language> = reqwest::blocking::get(LANGUAGE_COLORS_ENDPOINT)?
         .error_for_status()?
         .json()?;
@@ -96,31 +97,12 @@ fn get_color_map() -> Result<HashMap<String, (u8, u8, u8)>> {
     Ok(res)
 }
 
-fn search(
-    endpoint: &str,
-    query: &str,
-    language: Option<&str>,
-    limit: usize,
-) -> Result<Vec<Repository>> {
-    let limit = limit.to_string();
-    let mut query_params = vec![("query", query), ("limit", &limit)];
-
-    if let Some(language) = language {
-        query_params.push(("language", language));
-    }
-
-    let res = reqwest::blocking::Client::default()
-        .get(format!("{endpoint}/api/search"))
-        .query(&query_params)
-        .send()?
-        .error_for_status()?
-        .json()?;
-
-    Ok(res)
+trait Printer {
+    fn print_short(&self, color_map: &Option<LanguageMap>);
 }
 
-impl Repository {
-    fn print_short(&self, color_map: &Option<HashMap<String, (u8, u8, u8)>>) {
+impl Printer for Repository {
+    fn print_short(&self, color_map: &Option<LanguageMap>) {
         // "\x1b[38;2;255;255;0mHello"
         println!();
 
@@ -156,5 +138,12 @@ impl Repository {
                 println!("⬤ {language}");
             }
         }
+    }
+}
+
+fn main() {
+    if let Err(err) = run() {
+        println!("{} {}", style("error:").bold().red(), err.to_string());
+        exit(1);
     }
 }

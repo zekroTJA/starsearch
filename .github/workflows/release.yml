@@ -48,14 +48,14 @@ jobs:
         with:
           use-cross: true
           command: build
-          args: --release --bin cli --target ${{ matrix.target }} ${{ matrix.flags }}
+          args: --release -p starsearch-cli --target ${{ matrix.target }} ${{ matrix.flags }}
 
       - name: Rename Artifacts
         shell: bash
         run: |
           ver=${GITHUB_REF#refs/tags/}
           ASSET_PATH=cli-$ver-${{ matrix.target }}${{ matrix.ext }}
-          mv target/${{ matrix.target }}/release/cli $ASSET_PATH
+          mv target/${{ matrix.target }}/release/starsearch-cli $ASSET_PATH
           echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
 
       - name: Release

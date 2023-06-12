@@ -1,4 +1,3 @@
-mod cli;
 mod config;
 mod db;
 mod scraper;
@@ -8,7 +7,7 @@ use config::Config;
 use db::Database;
 use env_logger::Env;
 use scraper::Scraper;
-use std::{sync::Arc, time::Duration};
+use std::{error::Error, sync::Arc, time::Duration};
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 
 #[macro_use]
@@ -49,19 +48,19 @@ async fn main() -> Result<(), rocket::Error> {
         let scraper = scraper.clone();
         let db = db.clone();
         rocket::tokio::spawn(async move {
-            scrape(scraper, db).await;
+            if let Err(err) = scrape(scraper, db).await {
+                error!("Initial scraping failed: {err}");
+            }
         });
     }
 
     web::run(db).await
 }
 
-async fn scrape(scraper: Arc<Scraper>, db: Arc<Database>) {
-    let res = scraper.run().await.expect("scraping failed");
-
-    db.insert_repos(&res)
-        .await
-        .expect("failed inserting repositories");
+async fn scrape(scraper: Arc<Scraper>, db: Arc<Database>) -> Result<(), Box<dyn Error>> {
+    let res = scraper.run().await?;
+    db.insert_repos(&res).await?;
+    Ok(())
 }
 
 async fn schedule_scraping(
@@ -76,7 +75,9 @@ async fn schedule_scraping(
         let db = db.clone();
         Box::pin(async move {
             info!("Starting scheduled scraping ...");
-            scrape(scraper, db).await;
+            if let Err(err) = scrape(scraper, db).await {
+                error!("Scraping failed: {err}");
+            }
         })
     })?;
 

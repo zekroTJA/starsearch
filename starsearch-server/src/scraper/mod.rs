@@ -5,13 +5,13 @@ pub mod models;
 
 use crate::scraper::models::ContentEntry;
 
-use self::models::Repository;
 use errors::Result;
 use log::debug;
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT},
     IntoUrl,
 };
+use starsearch_sdk::models::Repository;
 
 const REPO_LIMIT: usize = 10_000;
 

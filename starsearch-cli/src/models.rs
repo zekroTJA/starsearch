@@ -1,4 +1,7 @@
 use serde::Deserialize;
+use std::collections::HashMap;
+
+pub type LanguageMap = HashMap<String, (u8, u8, u8)>;
 
 #[derive(Deserialize)]
 pub struct Language {
