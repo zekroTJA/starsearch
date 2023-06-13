@@ -4,3 +4,4 @@ members = [
     "starsearch-sdk", 
     "starsearch-server",
 ]
+resolver = "2"

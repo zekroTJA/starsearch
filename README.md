@@ -30,6 +30,20 @@ EXEC_PATH="$(which starsearch-cli)" mv $EXEC_PATH $(dirname $EXEC_PATH)/starsear
 
 ![](.github/media/cli-demo.gif)
 
+### Config Reference
+
+You can create a `starsearch.toml` in your local users config directory to configure the behaviour of the CLI.
+
+```toml
+# The starsearch API endpoint
+endpoint = "https://starsearch.exmaple.com"
+# The default limit for results shown.
+limit = 5
+# The default view mode. Can be either "condensed"
+# or "detailed".
+display_mode = "detailed"
+```
+
 ## Setup the Server
 
 Currently, starsearch is statically configured to your GitHub account and does not provide OAUth login

@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 
+mod config;
 mod models;
 
 use self::models::Language;
+use crate::config::{Config, DisplayMode};
 use clap::Parser;
 use console::style;
 use models::LanguageMap;
@@ -22,12 +24,16 @@ struct Args {
     lang: Option<String>,
 
     /// Maximum number of results shown.
-    #[arg(short = 'n', long, default_value_t = 5)]
-    limit: usize,
+    #[arg(short = 'n', long)]
+    limit: Option<usize>,
 
     /// Display results in codensed mode.
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long)]
     condensed: bool,
+
+    /// Display results in detailed mode.
+    #[arg(short, long)]
+    detailed: bool,
 
     /// The starsearch API endpoint.
     #[arg(short, long, env = "STARSEARCH_ENDPOINT")]
@@ -37,25 +43,35 @@ struct Args {
 pub fn run() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
-    let Some(endpoint) = args.endpoint else {
+    let cfg = Config::parse()?;
+
+    let Some(endpoint) = args.endpoint.or(cfg.as_ref().and_then(|c| c.endpoint.clone())) else {
         println!(
-            "No starsearch API endpoint has been specified. \
-            Either pass it via the {} parameter or via the {} \
-            environment variable.\n\n\
-            {} Simply set the {} environment variable to your {} \
-            to configure it permanently.",
-            style("--endpoint").italic().green(), 
+            "No starsearch API endpoint has been specified. You can set the endpoint\n\
+            - either via the {} flag,\n\
+            - or via the {} environment variable\n\
+            - or via the {} key in the config file (at {})\n\
+            {}\n\
+            {}",
+            style("--endpoint").italic().green(),
             style("STARSEARCH_ENDPOINT").italic().green(),
-            style("Pro Tip:").yellow(),
-            style(".profile").cyan(),
-            style("STARSEARCH_ENDPOINT").italic().green(),
+            style("endpoint").italic().green(),
+            style(Config::path().to_string_lossy()).italic().cyan(),
+            style("For more information about the configuration file, see").dim(),
+            style("https://github.com/zekroTJA/starsearch#config-reference").underlined().dim()
         );
         return Ok(());
     };
 
     let client = Client::new(endpoint);
 
-    let res = client.search(&args.query, args.lang.as_deref(), args.limit)?;
+    let res = client.search(
+        &args.query,
+        args.lang.as_deref(),
+        args.limit
+            .or(cfg.as_ref().and_then(|c| c.limit))
+            .unwrap_or(5),
+    )?;
 
     if res.is_empty() {
         println!("No results have been found. :(");
@@ -81,12 +97,19 @@ pub fn run() -> Result<(), Box<dyn Error>> {
         style("results:").dim()
     );
 
-    res.iter().for_each(|v| {
-        if args.condensed {
-            v.print_condensed(&color_map)
-        } else {
-            v.print_short(&color_map)
-        }
+    let mut display_mode = cfg
+        .and_then(|c| c.display_mode)
+        .unwrap_or(DisplayMode::Detailed);
+    if args.detailed {
+        display_mode = DisplayMode::Detailed;
+    }
+    if args.condensed {
+        display_mode = DisplayMode::Condensed;
+    }
+
+    res.iter().for_each(|v| match display_mode {
+        DisplayMode::Condensed => v.print_condensed(&color_map),
+        DisplayMode::Detailed => v.print_detailed(&color_map),
     });
 
     Ok(())
@@ -108,7 +131,7 @@ fn get_color_map() -> Result<LanguageMap, reqwest::Error> {
 }
 
 trait Printer {
-    fn print_short(&self, color_map: &Option<LanguageMap>);
+    fn print_detailed(&self, color_map: &Option<LanguageMap>);
     fn print_condensed(&self, color_map: &Option<LanguageMap>);
 }
 
@@ -136,7 +159,7 @@ impl Printer for Repository {
         println!();
     }
 
-    fn print_short(&self, color_map: &Option<LanguageMap>) {
+    fn print_detailed(&self, color_map: &Option<LanguageMap>) {
         println!();
 
         println!(
