@@ -1,5 +1,6 @@
-FROM rust:latest AS build
+FROM rust:1-slim-bookworm AS build
 WORKDIR /build
+RUN apt-get update && apt-get install -y pkg-config libssl-dev
 RUN rustup default nightly
 COPY starsearch-cli starsearch-cli
 COPY starsearch-sdk starsearch-sdk
@@ -9,9 +10,9 @@ COPY Cargo.toml .
 COPY Rocket.toml .
 RUN cargo build -p starsearch-server --release
 
-FROM debian:stable-slim
+FROM debian:bookworm-slim
 WORKDIR /app
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates 
 COPY static static
 COPY templates templates
 COPY --from=build /build/target/release/starsearch-server .
