@@ -11,12 +11,22 @@
   </header>
   <body>
     <div id="header">
-      <input id="input-query" type="text" placeholder="Search ..." value="{{query}}" />
+      <input 
+        id="input-query" 
+        type="text" 
+        placeholder="Search ..." 
+        value="{{query}}"
+        enterkeyhint="search"
+        spellcheck="false"
+        autofocus
+      />
       <input
         id="input-language"
         type="text"
         placeholder="Language Filter"
         value="{{language_filter}}"
+        enterkeyhint="search"
+        spellcheck="false"
       />
       <button id="button-search">Search</button>
     </div>
