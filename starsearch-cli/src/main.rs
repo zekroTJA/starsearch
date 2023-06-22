@@ -17,7 +17,7 @@ const LANGUAGE_COLORS_ENDPOINT: &str = "https://languages.ranna.dev/languages.mi
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// The search query.
-    query: String,
+    query: Vec<String>,
 
     /// Filter by programming language.
     #[arg(short, long)]
@@ -66,7 +66,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let client = Client::new(endpoint);
 
     let res = client.search(
-        &args.query,
+        &args.query.join(" "),
         args.lang.as_deref(),
         args.limit
             .or(cfg.as_ref().and_then(|c| c.limit))
