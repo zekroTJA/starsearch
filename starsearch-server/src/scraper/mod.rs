@@ -41,7 +41,7 @@ impl Scraper {
         })
     }
 
-    pub async fn get_starred_repos(&self) -> Result<Vec<Repository>> {
+    pub async fn get_starred_repos(&self, until: Option<u32>) -> Result<Vec<Repository>> {
         let mut page = 1;
         let mut repos = vec![];
 
@@ -65,6 +65,13 @@ impl Scraper {
 
             if res.is_empty() {
                 break;
+            }
+
+            if let Some(until) = until {
+                if let Some((idx, _)) = res.iter().enumerate().find(|(_, r)| r.id == until) {
+                    repos.extend(res[..idx].iter().cloned());
+                    break;
+                }
             }
 
             repos.append(&mut res);
@@ -137,8 +144,8 @@ impl Scraper {
         Ok(None)
     }
 
-    pub async fn run(&self) -> Result<Vec<Repository>> {
-        let mut repos = self.get_starred_repos().await?;
+    pub async fn index(&self, last_id: Option<u32>) -> Result<Vec<Repository>> {
+        let mut repos = self.get_starred_repos(last_id).await?;
 
         repos.retain(|r| !r.disabled);
 

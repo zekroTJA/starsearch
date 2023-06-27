@@ -32,3 +32,13 @@ services:
       # Set this to true to disable scraping your starred repositories
       # on application startup.
       SS_SKIP_INITIAL_SCRAPE: true
+      # Interval (in seconds) in which a "fast" scrape is performed.
+      # That means that only new stars are indexed instead of re-indexing
+      # all starred repositories.
+      SS_SCRAPE_FAST_INTERVAL_SECONDS: 850
+      # Interval (in seconds) in which a "full" scrape is performed.
+      # That means that all starred repositories are fetched and re-indexed.
+      # Depending on the size of your library, this process can take some time.
+      # It is recommended to set both intervals in a way where both processed
+      # won't start on the same time.
+      SS_SCRAPE_FULL_INTERVAL_SECONDS: 86400

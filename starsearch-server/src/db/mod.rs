@@ -108,4 +108,8 @@ impl Database {
 
         Ok(res)
     }
+
+    pub async fn get_latest(&self) -> Result<Option<Repository>> {
+        self.list(1, None).await.map(|v| v.first().cloned())
+    }
 }
