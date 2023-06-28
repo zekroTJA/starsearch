@@ -2,14 +2,20 @@
 
 mod config;
 mod models;
+mod tui;
 
 use self::models::Language;
 use crate::config::{Config, DisplayMode};
 use clap::Parser;
-use console::style;
+use console::{style, Term};
 use models::LanguageMap;
 use starsearch_sdk::{client::Client, models::Repository};
-use std::{collections::HashMap, error::Error, process::exit};
+use std::{
+    collections::HashMap,
+    error::Error,
+    io::{self, Write},
+    process::exit,
+};
 
 const LANGUAGE_COLORS_ENDPOINT: &str = "https://languages.ranna.dev/languages.minified.json";
 
@@ -38,6 +44,10 @@ struct Args {
     /// The starsearch API endpoint.
     #[arg(short, long, env = "STARSEARCH_ENDPOINT")]
     endpoint: Option<String>,
+
+    // Trigger a quick re-index on the server.
+    #[arg(long)]
+    refresh: bool,
 }
 
 pub fn run() -> Result<(), Box<dyn Error>> {
@@ -64,6 +74,14 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     };
 
     let client = Client::new(endpoint);
+
+    if args.refresh {
+        tui::print_status("Refreshing database ...");
+        client.refresh()?;
+        tui::print_success("Database successfully updated.");
+
+        return Ok(());
+    }
 
     let res = client.search(
         &args.query.join(" "),
