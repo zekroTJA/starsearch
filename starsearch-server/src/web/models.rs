@@ -1,5 +1,8 @@
+use rocket::{http::Status, serde::json::Json};
 use serde::Serialize;
 use starsearch_sdk::models::Repository;
+
+use crate::{db::errors::DatabaseError, scraper::errors::ScraperError};
 
 #[derive(Serialize)]
 pub struct RepositoryViewModel<'a> {
@@ -36,5 +39,27 @@ impl<E: ToString> From<E> for Error {
         Self {
             message: value.to_string(),
         }
+    }
+}
+
+impl From<DatabaseError> for (Status, Json<Error>) {
+    fn from(value: DatabaseError) -> Self {
+        (
+            Status::InternalServerError,
+            Json(Error {
+                message: value.to_string(),
+            }),
+        )
+    }
+}
+
+impl From<ScraperError> for (Status, Json<Error>) {
+    fn from(value: ScraperError) -> Self {
+        (
+            Status::InternalServerError,
+            Json(Error {
+                message: value.to_string(),
+            }),
+        )
     }
 }

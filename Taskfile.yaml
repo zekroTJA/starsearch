@@ -33,7 +33,7 @@ tasks:
   dev-env-down:
     desc: Shut down development environment containers.
     cmds:
-      - docker compose -f docker-compose.dev.yml up down
+      - docker compose -f docker-compose.dev.yml down
 
   docker-compose:
     desc: Run docker compose commands on the development environment stack.

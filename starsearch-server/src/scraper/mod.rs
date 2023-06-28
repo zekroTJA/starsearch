@@ -3,8 +3,7 @@
 pub mod errors;
 pub mod models;
 
-use crate::scraper::models::ContentEntry;
-
+use crate::{db::Database, scraper::models::ContentEntry};
 use errors::Result;
 use log::debug;
 use reqwest::{
@@ -12,16 +11,22 @@ use reqwest::{
     IntoUrl,
 };
 use starsearch_sdk::models::Repository;
+use std::sync::Arc;
 
 const REPO_LIMIT: usize = 10_000;
 
 pub struct Scraper {
     github_username: String,
     client: reqwest::Client,
+    db: Arc<Database>,
 }
 
 impl Scraper {
-    pub fn new<S: Into<String>>(github_username: S, apitoken: Option<S>) -> Result<Self> {
+    pub fn new<S: Into<String>>(
+        github_username: S,
+        apitoken: Option<S>,
+        db: Arc<Database>,
+    ) -> Result<Self> {
         let mut headers = HeaderMap::new();
         headers.insert(USER_AGENT, HeaderValue::from_static("starsearch-scraper"));
         if let Some(apitoken) = apitoken {
@@ -38,16 +43,17 @@ impl Scraper {
         Ok(Self {
             github_username: github_username.into(),
             client,
+            db,
         })
     }
 
-    pub async fn get_starred_repos(&self) -> Result<Vec<Repository>> {
+    pub async fn get_starred_repos(&self, only_new: bool) -> Result<Vec<Repository>> {
         let mut page = 1;
         let mut repos = vec![];
 
         debug!("Scraping starred repos of user {}", &self.github_username);
 
-        loop {
+        'outer: loop {
             debug!("Scraping page {} ...", &page);
 
             let mut res: Vec<Repository> = self
@@ -65,6 +71,15 @@ impl Scraper {
 
             if res.is_empty() {
                 break;
+            }
+
+            if only_new {
+                for (idx, r) in res.iter().enumerate() {
+                    if self.db.get(r.id).await?.is_some() {
+                        repos.extend(res[..idx].iter().cloned());
+                        break 'outer;
+                    }
+                }
             }
 
             repos.append(&mut res);
@@ -137,8 +152,8 @@ impl Scraper {
         Ok(None)
     }
 
-    pub async fn run(&self) -> Result<Vec<Repository>> {
-        let mut repos = self.get_starred_repos().await?;
+    pub async fn index(&self, fast: bool) -> Result<()> {
+        let mut repos = self.get_starred_repos(fast).await?;
 
         repos.retain(|r| !r.disabled);
 
@@ -149,6 +164,8 @@ impl Scraper {
             repository.readme_content = readme_content;
         }
 
-        Ok(repos)
+        self.db.insert_repos(&repos).await?;
+
+        Ok(())
     }
 }

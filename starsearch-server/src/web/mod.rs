@@ -1,10 +1,12 @@
 mod catchers;
 mod models;
+mod ratelimit;
 
-use self::models::RepositoryViewModel;
-use crate::db::Database;
-use rocket::{fs::FileServer, serde::json::Json, Config, State};
+use self::models::{Error, RepositoryViewModel};
+use crate::{db::Database, scraper::Scraper};
+use rocket::{fs::FileServer, http::Status, serde::json::Json, Config, State};
 use rocket_dyn_templates::{context, Template};
+use rocket_governor::RocketGovernor;
 use starsearch_sdk::models::Repository;
 use std::sync::Arc;
 
@@ -49,11 +51,21 @@ async fn search(
     Json(res)
 }
 
-pub async fn run(db: Arc<Database>) -> Result<(), rocket::Error> {
+#[post("/refresh")]
+async fn refresh(
+    _limit: RocketGovernor<'_, ratelimit::Refresh>,
+    scraper: &State<Arc<Scraper>>,
+) -> Result<Status, (Status, Json<Error>)> {
+    scraper.index(true).await?;
+    Ok(Status::Ok)
+}
+
+pub async fn run(db: Arc<Database>, scraper: Arc<Scraper>) -> Result<(), rocket::Error> {
     rocket::build()
         .manage(db)
+        .manage(scraper)
         .mount("/", routes![index])
-        .mount("/api", routes![search])
+        .mount("/api", routes![search, refresh])
         .mount("/static", FileServer::from("static"))
         .register("/api", catchers![catchers::default_catcher])
         .configure(Config::figment())

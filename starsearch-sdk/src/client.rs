@@ -39,4 +39,13 @@ impl Client {
 
         Ok(res)
     }
+
+    pub fn refresh(&self) -> Result<()> {
+        self.client
+            .post(format!("{}/api/refresh", self.endpoint))
+            .send()?
+            .error_for_status()?;
+
+        Ok(())
+    }
 }
