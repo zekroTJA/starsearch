@@ -1,7 +1,11 @@
 pub mod errors;
 
 use errors::Result;
-use meilisearch_sdk::{documents::DocumentsQuery, errors::ErrorCode, Client};
+use meilisearch_sdk::{
+    documents::DocumentsQuery,
+    errors::{ErrorCode},
+    Client,
+};
 use starsearch_sdk::models::Repository;
 
 pub struct Database {
@@ -45,7 +49,6 @@ impl Database {
             "attribute",
             "sort",
             "exactness",
-            "created_at:desc",
             "updated_at:desc",
         ])
         .await?;
@@ -55,8 +58,7 @@ impl Database {
 
     pub async fn insert_repos(&self, repos: &[Repository]) -> Result<()> {
         let idx = self.client.index("repositories");
-
-        for reps in repos.windows(5) {
+        for reps in repos.chunks(5) {
             idx.add_documents(reps, Some("id")).await?;
         }
 
@@ -109,7 +111,16 @@ impl Database {
         Ok(res)
     }
 
-    pub async fn get_latest(&self) -> Result<Option<Repository>> {
-        self.list(1, None).await.map(|v| v.first().cloned())
+    pub async fn get(&self, id: u32) -> Result<Option<Repository>> {
+        let idx = self.client.index("repositories");
+        let res = idx.get_document(&id.to_string()).await;
+        match res {
+            Ok(v) => Ok(Some(v)),
+            Err(err) 
+                if matches!(&err, meilisearch_sdk::errors::Error::Meilisearch(inner) 
+                if matches!(inner.error_code, ErrorCode::DocumentNotFound)) 
+                    => Ok(None),
+            Err(err) => Err(err.into()),
+        }
     }
 }

@@ -31,7 +31,7 @@ async fn main() -> Result<(), rocket::Error> {
         .expect("failed creating database connection");
     let db = Arc::new(db);
 
-    let scraper = Scraper::new(cfg.github_username, cfg.github_apitoken)
+    let scraper = Scraper::new(cfg.github_username, cfg.github_apitoken, db.clone())
         .expect("failed constructing scraper");
     let scraper = Arc::new(scraper);
 
@@ -46,11 +46,11 @@ async fn main() -> Result<(), rocket::Error> {
         .await
         .expect("failed creating scheduler");
 
-    schedule_fast_scraping(&sched, scraper.clone(), db.clone(), fast_interval)
+    schedule_fast_scraping(&sched, scraper.clone(), fast_interval)
         .await
         .expect("failed scheduling fast scraping job");
 
-    schedule_full_scraping(&sched, scraper.clone(), db.clone(), full_interval)
+    schedule_full_scraping(&sched, scraper.clone(), full_interval)
         .await
         .expect("failed scheduling fast scraping job");
 
@@ -59,40 +59,31 @@ async fn main() -> Result<(), rocket::Error> {
     if !cfg.skip_initial_scrape.is_some_and(|v| v) {
         info!("Starting initial scraping ...");
         let scraper = scraper.clone();
-        let db = db.clone();
         rocket::tokio::spawn(async move {
-            if let Err(err) = scrape(scraper, db, true).await {
+            if let Err(err) = scrape(scraper, true).await {
                 error!("Initial scraping failed: {err}");
             }
         });
     }
 
-    web::run(db).await
+    web::run(db, scraper).await
 }
 
-async fn scrape(
-    scraper: Arc<Scraper>,
-    db: Arc<Database>,
-    fast: bool,
-) -> Result<(), Box<dyn Error>> {
-    let latest = if fast { db.get_latest().await? } else { None };
-    let res = scraper.index(latest.map(|r| r.id)).await?;
-    db.insert_repos(&res).await?;
+async fn scrape(scraper: Arc<Scraper>, fast: bool) -> Result<(), Box<dyn Error>> {
+    scraper.index(fast).await?;
     Ok(())
 }
 
 async fn schedule_fast_scraping(
     sched: &JobScheduler,
     scraper: Arc<Scraper>,
-    db: Arc<Database>,
     interval_seconds: u64,
 ) -> Result<(), JobSchedulerError> {
     let job = Job::new_repeated_async(Duration::from_secs(interval_seconds), move |_uuid, _l| {
         let scraper = scraper.clone();
-        let db = db.clone();
         Box::pin(async move {
             info!("Starting scheduled fast scraping ...");
-            if let Err(err) = scrape(scraper, db, true).await {
+            if let Err(err) = scrape(scraper, true).await {
                 error!("Fast scraping failed: {err}");
             }
         })
@@ -105,15 +96,13 @@ async fn schedule_fast_scraping(
 async fn schedule_full_scraping(
     sched: &JobScheduler,
     scraper: Arc<Scraper>,
-    db: Arc<Database>,
     interval_seconds: u64,
 ) -> Result<(), JobSchedulerError> {
     let job = Job::new_repeated_async(Duration::from_secs(interval_seconds), move |_uuid, _l| {
         let scraper = scraper.clone();
-        let db = db.clone();
         Box::pin(async move {
             info!("Starting scheduled full scraping ...");
-            if let Err(err) = scrape(scraper, db, false).await {
+            if let Err(err) = scrape(scraper, false).await {
                 error!("Full scraping failed: {err}");
             }
         })
