@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 mod config;
 mod models;
 mod tui;
@@ -7,15 +5,10 @@ mod tui;
 use self::models::Language;
 use crate::config::{Config, DisplayMode};
 use clap::Parser;
-use console::{style, Term};
+use console::style;
 use models::LanguageMap;
 use starsearch_sdk::{client::Client, models::Repository};
-use std::{
-    collections::HashMap,
-    error::Error,
-    io::{self, Write},
-    process::exit,
-};
+use std::{collections::HashMap, error::Error, process::exit};
 
 const LANGUAGE_COLORS_ENDPOINT: &str = "https://languages.ranna.dev/languages.minified.json";
 
