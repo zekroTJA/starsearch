@@ -38,7 +38,7 @@ struct Args {
     #[arg(short, long, env = "STARSEARCH_ENDPOINT")]
     endpoint: Option<String>,
 
-    // Trigger a quick re-index on the server.
+    /// Trigger a quick re-index on the server.
     #[arg(long)]
     refresh: bool,
 }
