@@ -3,8 +3,8 @@ pub mod errors;
 use errors::Result;
 use meilisearch_sdk::{
     documents::DocumentsQuery,
-    errors::{ErrorCode},
-    Client,
+    errors::ErrorCode,
+    client::Client,
 };
 use starsearch_sdk::models::Repository;
 
@@ -14,7 +14,7 @@ pub struct Database {
 
 impl Database {
     pub async fn new(host: impl Into<String>, api_key: Option<impl Into<String>>) -> Result<Self> {
-        let client = Client::new(host, api_key);
+        let client = Client::new(host, api_key)?;
 
         let result = client.get_index("repositories").await;
         if let Err(err) = result {

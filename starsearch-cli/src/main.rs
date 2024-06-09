@@ -48,7 +48,10 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let cfg = Config::parse()?;
 
-    let Some(endpoint) = args.endpoint.or(cfg.as_ref().and_then(|c| c.endpoint.clone())) else {
+    let Some(endpoint) = args
+        .endpoint
+        .or(cfg.as_ref().and_then(|c| c.endpoint.clone()))
+    else {
         println!(
             "No starsearch API endpoint has been specified. You can set the endpoint\n\
             - either via the {} flag,\n\
@@ -61,7 +64,9 @@ pub fn run() -> Result<(), Box<dyn Error>> {
             style("endpoint").italic().green(),
             style(Config::path().to_string_lossy()).italic().cyan(),
             style("For more information about the configuration file, see").dim(),
-            style("https://github.com/zekroTJA/starsearch#config-reference").underlined().dim()
+            style("https://github.com/zekroTJA/starsearch#config-reference")
+                .underlined()
+                .dim()
         );
         return Ok(());
     };
@@ -222,7 +227,7 @@ fn cap(v: &[String], max: usize) -> Vec<String> {
 
 fn main() {
     if let Err(err) = run() {
-        println!("{} {}", style("error:").bold().red(), err.to_string());
+        println!("{} {}", style("error:").bold().red(), err);
         exit(1);
     }
 }

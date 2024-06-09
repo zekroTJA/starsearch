@@ -7,16 +7,16 @@ edition = "2021"
 
 [dependencies]
 starsearch-sdk = { path = "../starsearch-sdk" }
-chrono = { version = "0.4.26", features = ["serde"] }
-dotenv = "0.15.0"
-env_logger = "0.10.0"
-figment = { version = "0.10.10", features = ["env"] }
-log = "0.4.18"
-meilisearch-sdk = "0.24.0"
-reqwest = { version = "0.11.18", features = ["default-tls", "tokio-native-tls", "json", "blocking"] }
-rocket = { version = "0.5.0-rc.3", features = ["json"] }
-rocket_dyn_templates = { version = "0.1.0-rc.3", features = ["handlebars"] }
+chrono = { version = "0.4", features = ["serde"] }
+dotenv = "0.15"
+env_logger = "0.11"
+figment = { version = "0.10", features = ["env"] }
+log = "0.4"
+meilisearch-sdk = "0.26"
+reqwest = { version = "0.12", features = ["default-tls", "json", "blocking"] }
+rocket = { version = "0.5.1", features = ["json"] }
+rocket_dyn_templates = { version = "0.2", features = ["handlebars"] }
 serde = { version = "1.0.164", features = ["derive"] }
 thiserror = "1.0.40"
-tokio-cron-scheduler = "0.9.4"
-rocket-governor = "0.1.0-rc.4"
+tokio-cron-scheduler = "0.10"
+rocket-governor = "0.2.0-rc.3"

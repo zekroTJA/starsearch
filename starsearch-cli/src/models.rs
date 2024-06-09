@@ -10,9 +10,7 @@ pub struct Language {
 
 impl Language {
     pub fn rgb_color(&self) -> Option<(u8, u8, u8)> {
-        let Some(color) = &self.color else {
-            return None;
-        };
+        let color = self.color.as_ref()?;
 
         let color = color.trim_start_matches('#');
 
