@@ -1,5 +1,5 @@
 use crate::errors::Result;
-use crate::models::Repository;
+use crate::models::{Repository, ServerInfo};
 
 pub struct Client {
     endpoint: String,
@@ -47,5 +47,15 @@ impl Client {
             .error_for_status()?;
 
         Ok(())
+    }
+
+    pub fn server_info(&self) -> Result<ServerInfo> {
+        let res = self
+            .client
+            .get(format!("{}/api/serverinfo", self.endpoint))
+            .send()?
+            .error_for_status()?
+            .json()?;
+        Ok(res)
     }
 }
