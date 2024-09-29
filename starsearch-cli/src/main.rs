@@ -4,8 +4,10 @@ mod tui;
 
 use self::models::Language;
 use crate::config::{Config, DisplayMode};
+use chrono::{DateTime, Local, TimeDelta};
 use clap::Parser;
 use console::style;
+use core::fmt;
 use models::LanguageMap;
 use starsearch_sdk::{client::Client, models::Repository};
 use std::{collections::HashMap, error::Error, process::exit};
@@ -41,6 +43,10 @@ struct Args {
     /// Trigger a quick re-index on the server.
     #[arg(long)]
     refresh: bool,
+
+    /// Dispaly server info.
+    #[arg(long)]
+    info: bool,
 }
 
 pub fn run() -> Result<(), Box<dyn Error>> {
@@ -72,6 +78,19 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     };
 
     let client = Client::new(endpoint);
+
+    if args.info {
+        let server_info = client.server_info()?;
+        println!(
+            "Indexed repositories:  {}\n\
+            Last fast index run:   {}\n\
+            Last full index run:   {}",
+            style(server_info.index_count).bold(),
+            date_string(server_info.index_dates.last_fast_index),
+            date_string(server_info.index_dates.last_full_index),
+        );
+        return Ok(());
+    }
 
     if args.refresh {
         tui::print_status("Refreshing database ...");
@@ -223,6 +242,21 @@ fn cap(v: &[String], max: usize) -> Vec<String> {
         .cloned()
         .chain(["...".to_string()])
         .collect();
+}
+
+fn date_string(date: Option<DateTime<Local>>) -> impl fmt::Display {
+    const DATE_FORMAT: &str = "%Y-%m-%d %H:%M (%Z)";
+    let now = Local::now();
+    match date {
+        Some(date) if now - date < TimeDelta::days(1) => {
+            style(date.format(DATE_FORMAT).to_string()).bold().green()
+        }
+        Some(date) if now - date < TimeDelta::days(3) => {
+            style(date.format(DATE_FORMAT).to_string()).bold().yellow()
+        }
+        Some(date) => style(date.to_string()).bold().red(),
+        None => style("Never".to_string()).bold().red(),
+    }
 }
 
 fn main() {
