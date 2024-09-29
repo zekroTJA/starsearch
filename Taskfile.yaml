@@ -17,7 +17,7 @@ tasks:
     desc: Cargo run the CLI.
     aliases: [cli]
     cmds:
-      - cargo run -p starsearch-cli {{.CLI_ARGS}}
+      - cargo run -p starsearch-cli -- {{.CLI_ARGS}}
 
   release:
     desc: Build the project binaries in release mode.
