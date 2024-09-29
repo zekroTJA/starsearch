@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -32,4 +32,17 @@ pub struct License {
 pub struct User {
     pub id: u32,
     pub login: String,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
+pub struct IndexDates {
+    pub last_fast_index: Option<DateTime<Local>>,
+    pub last_full_index: Option<DateTime<Local>>,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct ServerInfo {
+    #[serde(flatten)]
+    pub index_dates: IndexDates,
+    pub index_count: usize,
 }

@@ -7,7 +7,7 @@ use crate::{db::Database, scraper::Scraper};
 use rocket::{fs::FileServer, http::Status, serde::json::Json, Config, State};
 use rocket_dyn_templates::{context, Template};
 use rocket_governor::RocketGovernor;
-use starsearch_sdk::models::Repository;
+use starsearch_sdk::models::{Repository, ServerInfo};
 use std::sync::Arc;
 
 #[get("/?<query>&<limit>&<language>")]
@@ -60,12 +60,18 @@ async fn refresh(
     Ok(Status::Ok)
 }
 
+#[get("/serverinfo")]
+async fn server_info(db: &State<Arc<Database>>) -> Result<Json<ServerInfo>, (Status, Json<Error>)> {
+    let server_info = db.get_info().await?;
+    Ok(Json(server_info))
+}
+
 pub async fn run(db: Arc<Database>, scraper: Arc<Scraper>) -> Result<(), rocket::Error> {
     rocket::build()
         .manage(db)
         .manage(scraper)
         .mount("/", routes![index])
-        .mount("/api", routes![search, refresh])
+        .mount("/api", routes![search, refresh, server_info])
         .mount("/static", FileServer::from("static"))
         .register("/api", catchers![catchers::default_catcher])
         .configure(Config::figment())

@@ -4,6 +4,7 @@ pub mod errors;
 pub mod models;
 
 use crate::{db::Database, scraper::models::ContentEntry};
+use chrono::Local;
 use errors::Result;
 use log::debug;
 use reqwest::{
@@ -165,6 +166,14 @@ impl Scraper {
         }
 
         self.db.insert_repos(&repos).await?;
+
+        let now = Local::now();
+        let mut index_dates = self.db.get_index_dates().await?;
+        index_dates.last_fast_index = Some(now);
+        if !fast {
+            index_dates.last_full_index = Some(now);
+        }
+        self.db.set_index_dates(index_dates).await?;
 
         Ok(())
     }

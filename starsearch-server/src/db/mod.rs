@@ -1,12 +1,12 @@
 pub mod errors;
+mod models;
 
 use errors::Result;
 use meilisearch_sdk::{
-    documents::DocumentsQuery,
-    errors::ErrorCode,
-    client::Client,
+    client::Client, documents::DocumentsQuery, errors::ErrorCode, indexes::Index,
 };
-use starsearch_sdk::models::Repository;
+use models::IndexDatesEntry;
+use starsearch_sdk::models::{IndexDates, Repository, ServerInfo};
 
 pub struct Database {
     client: Client,
@@ -15,20 +15,13 @@ pub struct Database {
 impl Database {
     pub async fn new(host: impl Into<String>, api_key: Option<impl Into<String>>) -> Result<Self> {
         let client = Client::new(host, api_key)?;
+        let db = Self { client };
 
-        let result = client.get_index("repositories").await;
-        if let Err(err) = result {
-            match err {
-                meilisearch_sdk::errors::Error::Meilisearch(err)
-                    if err.error_code == ErrorCode::IndexNotFound =>
-                {
-                    client.create_index("repositories", Some("id")).await?;
-                }
-                _ => return Err(err.into()),
-            }
-        }
+        let idx = db
+            .create_index_if_not_exists("repositories", Some("id"))
+            .await?;
 
-        let idx = client.index("repositories");
+        db.create_index_if_not_exists("meta", Some("id")).await?;
 
         idx.set_searchable_attributes([
             "name",
@@ -53,7 +46,25 @@ impl Database {
         ])
         .await?;
 
-        Ok(Self { client })
+        Ok(db)
+    }
+
+    pub async fn create_index_if_not_exists(
+        &self,
+        uid: &str,
+        primary_key: Option<&str>,
+    ) -> Result<Index> {
+        let result = self.client.get_index(uid).await;
+        match result {
+            Ok(index) => Ok(index),
+            Err(meilisearch_sdk::errors::Error::Meilisearch(err))
+                if err.error_code == ErrorCode::IndexNotFound =>
+            {
+                self.client.create_index(uid, primary_key).await?;
+                Ok(self.client.index(uid))
+            }
+            Err(err) => Err(err.into()),
+        }
     }
 
     pub async fn insert_repos(&self, repos: &[Repository]) -> Result<()> {
@@ -116,11 +127,47 @@ impl Database {
         let res = idx.get_document(&id.to_string()).await;
         match res {
             Ok(v) => Ok(Some(v)),
-            Err(err) 
-                if matches!(&err, meilisearch_sdk::errors::Error::Meilisearch(inner) 
-                if matches!(inner.error_code, ErrorCode::DocumentNotFound)) 
-                    => Ok(None),
+            Err(meilisearch_sdk::errors::Error::Meilisearch(err))
+                if err.error_code == ErrorCode::DocumentNotFound =>
+            {
+                Ok(None)
+            }
             Err(err) => Err(err.into()),
         }
+    }
+
+    pub async fn get_index_dates(&self) -> Result<IndexDates> {
+        let meta_idx = self.client.index("meta");
+        let index_dates = match meta_idx.get_document("index_dates").await {
+            Ok(doc) => doc,
+            Err(meilisearch_sdk::errors::Error::Meilisearch(err))
+                if err.error_code == ErrorCode::DocumentNotFound =>
+            {
+                IndexDates::default()
+            }
+
+            Err(err) => return Err(err.into()),
+        };
+        Ok(index_dates)
+    }
+
+    pub async fn set_index_dates(&self, dates: IndexDates) -> Result<()> {
+        let meta_idx = self.client.index("meta");
+        meta_idx
+            .add_documents(&[IndexDatesEntry::from(dates)], Some("id"))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn get_info(&self) -> Result<ServerInfo> {
+        let repo_idx = self.client.index("repositories");
+        let stats = repo_idx.get_stats().await?;
+
+        let index_dates = self.get_index_dates().await?;
+
+        Ok(ServerInfo {
+            index_dates,
+            index_count: stats.number_of_documents,
+        })
     }
 }
