@@ -3,14 +3,13 @@
 pub mod errors;
 pub mod models;
 
-use crate::{db::Database, scraper::models::ContentEntry};
+use crate::db::Database;
+use crate::scraper::models::ContentEntry;
 use chrono::Local;
 use errors::Result;
 use log::debug;
-use reqwest::{
-    header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT},
-    IntoUrl,
-};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
+use reqwest::IntoUrl;
 use starsearch_sdk::models::Repository;
 use std::sync::Arc;
 
@@ -100,18 +99,14 @@ impl Scraper {
     pub async fn get_file_contents<U: IntoUrl>(&self, url: U) -> Result<Option<String>> {
         let res = self.client.get(url).send().await?;
 
-        let res = if res.status().is_success() {
-            Some(res.text().await?)
-        } else {
-            None
-        };
+        let res = if res.status().is_success() { Some(res.text().await?) } else { None };
 
         Ok(res)
     }
 
     pub async fn get_readme_content(&self, owner: &str, repo: &str) -> Result<Option<String>> {
-        // First, try the default path for READMEs. This should match like 95% of the cases
-        // so we can save some API calls.
+        // First, try the default path for READMEs. This should match like 95% of the
+        // cases so we can save some API calls.
         debug!("Trying to get README.md content for {owner}/{repo}...");
         let res = self
             .get_file_contents(format!(
@@ -159,10 +154,13 @@ impl Scraper {
         repos.retain(|r| !r.disabled);
 
         for repository in repos.iter_mut() {
-            let readme_content = self
+            match self
                 .get_readme_content(&repository.owner.login, &repository.name)
-                .await?;
-            repository.readme_content = readme_content;
+                .await
+            {
+                Ok(content) => repository.readme_content = content,
+                Err(err) => error!("failed getting readme content: {err}"),
+            }
         }
 
         self.db.insert_repos(&repos).await?;

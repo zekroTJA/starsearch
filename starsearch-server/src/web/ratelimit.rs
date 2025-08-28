@@ -1,6 +1,5 @@
-use std::time::Duration;
-
 use rocket_governor::{Method, Quota, RocketGovernable};
+use std::time::Duration;
 
 pub struct Refresh;
 

@@ -12,11 +12,11 @@ dotenv = "0.15"
 env_logger = "0.11"
 figment = { version = "0.10", features = ["env"] }
 log = "0.4"
-meilisearch-sdk = "0.27"
+meilisearch-sdk = "0.29"
 reqwest = { version = "0.12", features = ["default-tls", "json", "blocking"] }
 rocket = { version = "0.5.1", features = ["json"] }
 rocket_dyn_templates = { version = "0.2", features = ["handlebars"] }
-serde = { version = "1.0.164", features = ["derive"] }
-thiserror = "1.0.40"
-tokio-cron-scheduler = "0.13"
-rocket-governor = "0.2.0-rc.3"
+serde = { version = "1.0.219", features = ["derive"] }
+thiserror = "2.0.16"
+tokio-cron-scheduler = "0.14"
+rocket-governor = "0.2.0-rc.4"

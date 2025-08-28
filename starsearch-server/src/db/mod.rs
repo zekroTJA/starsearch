@@ -2,9 +2,10 @@ pub mod errors;
 mod models;
 
 use errors::Result;
-use meilisearch_sdk::{
-    client::Client, documents::DocumentsQuery, errors::ErrorCode, indexes::Index,
-};
+use meilisearch_sdk::client::Client;
+use meilisearch_sdk::documents::DocumentsQuery;
+use meilisearch_sdk::errors::ErrorCode;
+use meilisearch_sdk::indexes::Index;
 use models::IndexDatesEntry;
 use starsearch_sdk::models::{IndexDates, Repository, ServerInfo};
 

@@ -9,8 +9,11 @@ use clap::Parser;
 use console::style;
 use core::fmt;
 use models::LanguageMap;
-use starsearch_sdk::{client::Client, models::Repository};
-use std::{collections::HashMap, error::Error, process::exit};
+use starsearch_sdk::client::Client;
+use starsearch_sdk::models::Repository;
+use std::collections::HashMap;
+use std::error::Error;
+use std::process::exit;
 
 const LANGUAGE_COLORS_ENDPOINT: &str = "https://languages.ranna.dev/languages.minified.json";
 
@@ -188,7 +191,7 @@ impl Printer for Repository {
         print!("{}", style(&self.html_url).cyan().underlined().bold());
 
         if let Some(description) = &self.description {
-            print!(" - {}", description);
+            print!(" - {description}");
         }
 
         println!();
@@ -207,7 +210,7 @@ impl Printer for Repository {
         );
 
         if let Some(description) = &self.description {
-            println!("{}", description);
+            println!("{description}");
         }
 
         if let Some(topics) = &self.topics {
@@ -237,11 +240,11 @@ fn cap(v: &[String], max: usize) -> Vec<String> {
         return v.to_vec();
     }
 
-    return v[..max]
+    v[..max]
         .iter()
         .cloned()
         .chain(["...".to_string()])
-        .collect();
+        .collect()
 }
 
 fn date_string(date: Option<DateTime<Local>>) -> impl fmt::Display {

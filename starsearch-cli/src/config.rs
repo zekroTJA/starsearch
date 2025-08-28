@@ -1,11 +1,8 @@
-use std::{
-    error::Error,
-    fs::File,
-    io::{ErrorKind, Read},
-    path::{Path, PathBuf},
-};
-
 use serde::Deserialize;
+use std::error::Error;
+use std::fs::File;
+use std::io::{ErrorKind, Read};
+use std::path::{Path, PathBuf};
 
 #[derive(Deserialize, Debug)]
 pub enum DisplayMode {

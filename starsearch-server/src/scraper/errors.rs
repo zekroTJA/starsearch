@@ -1,6 +1,5 @@
-use thiserror::Error;
-
 use crate::db::errors::DatabaseError;
+use thiserror::Error;
 
 pub type Result<T, E = ScraperError> = core::result::Result<T, E>;
 

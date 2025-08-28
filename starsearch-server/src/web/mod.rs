@@ -3,8 +3,12 @@ mod models;
 mod ratelimit;
 
 use self::models::{Error, RepositoryViewModel};
-use crate::{db::Database, scraper::Scraper};
-use rocket::{fs::FileServer, http::Status, serde::json::Json, Config, State};
+use crate::db::Database;
+use crate::scraper::Scraper;
+use rocket::fs::FileServer;
+use rocket::http::Status;
+use rocket::serde::json::Json;
+use rocket::{Config, State};
 use rocket_dyn_templates::{context, Template};
 use rocket_governor::RocketGovernor;
 use starsearch_sdk::models::{Repository, ServerInfo};

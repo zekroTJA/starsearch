@@ -1,4 +1,6 @@
-use rocket::figment::{error::Result, providers::Env, Figment};
+use rocket::figment::error::Result;
+use rocket::figment::providers::Env;
+use rocket::figment::Figment;
 use serde::Deserialize;
 
 #[derive(Deserialize)]

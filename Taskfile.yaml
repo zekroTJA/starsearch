@@ -16,8 +16,10 @@ tasks:
   run-cli:
     desc: Cargo run the CLI.
     aliases: [cli]
+    env:
+      STARSEARCH_ENDPOINT: http://localhost:8000
     cmds:
-      - cargo run -p starsearch-cli -- {{.CLI_ARGS}}
+      - env
 
   release:
     desc: Build the project binaries in release mode.

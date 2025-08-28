@@ -1,6 +1,7 @@
-use rocket::{http::Status, serde::json::Json, Request};
-
 use super::models::Error;
+use rocket::http::Status;
+use rocket::serde::json::Json;
+use rocket::Request;
 
 #[catch(default)]
 pub fn default_catcher(status: Status, _: &Request) -> (Status, Json<Error>) {

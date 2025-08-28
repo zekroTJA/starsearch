@@ -7,7 +7,9 @@ use config::Config;
 use db::Database;
 use env_logger::Env;
 use scraper::Scraper;
-use std::{error::Error, sync::Arc, time::Duration};
+use std::error::Error;
+use std::sync::Arc;
+use std::time::Duration;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 
 #[macro_use]

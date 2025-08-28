@@ -1,8 +1,9 @@
-use rocket::{http::Status, serde::json::Json};
+use crate::db::errors::DatabaseError;
+use crate::scraper::errors::ScraperError;
+use rocket::http::Status;
+use rocket::serde::json::Json;
 use serde::Serialize;
 use starsearch_sdk::models::Repository;
-
-use crate::{db::errors::DatabaseError, scraper::errors::ScraperError};
 
 #[derive(Serialize)]
 pub struct RepositoryViewModel<'a> {
