@@ -19,7 +19,7 @@ tasks:
     env:
       STARSEARCH_ENDPOINT: http://localhost:8000
     cmds:
-      - env
+      - cargo run -p starsearch-cli -- {{.CLI_ARGS}}
 
   release:
     desc: Build the project binaries in release mode.
