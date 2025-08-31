@@ -7,7 +7,7 @@ use meilisearch_sdk::documents::DocumentsQuery;
 use meilisearch_sdk::errors::ErrorCode;
 use meilisearch_sdk::indexes::Index;
 use models::IndexDatesEntry;
-use starsearch_sdk::models::{IndexDates, Repository, ServerInfo};
+use starsearch_sdk::models::{Id, IndexDates, Repository, ServerInfo};
 
 pub struct Database {
     client: Client,
@@ -123,6 +123,21 @@ impl Database {
         Ok(res)
     }
 
+    pub async fn list_ids(&self) -> Result<Vec<u32>> {
+        let idx = self.client.index("repositories");
+
+        let res = DocumentsQuery::new(&idx)
+            .with_fields(["id"])
+            .execute::<Id>()
+            .await?
+            .results
+            .into_iter()
+            .map(|id| id.id)
+            .collect();
+
+        Ok(res)
+    }
+
     pub async fn get(&self, id: u32) -> Result<Option<Repository>> {
         let idx = self.client.index("repositories");
         let res = idx.get_document(&id.to_string()).await;
@@ -135,6 +150,12 @@ impl Database {
             }
             Err(err) => Err(err.into()),
         }
+    }
+
+    pub async fn remove(&self, ids: &[u32]) -> Result<()> {
+        let idx = self.client.index("repositories");
+        idx.delete_documents(ids).await?;
+        Ok(())
     }
 
     pub async fn get_index_dates(&self) -> Result<IndexDates> {

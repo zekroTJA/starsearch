@@ -7,7 +7,7 @@ use crate::db::Database;
 use crate::scraper::models::ContentEntry;
 use chrono::Local;
 use errors::Result;
-use log::debug;
+use log::{debug, info};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use reqwest::IntoUrl;
 use starsearch_sdk::models::Repository;
@@ -164,6 +164,21 @@ impl Scraper {
         }
 
         self.db.insert_repos(&repos).await?;
+
+        if !fast {
+            let stored_repos = self.db.list_ids().await?;
+            let removed_repos: Vec<_> = stored_repos
+                .into_iter()
+                .filter(|id| !repos.iter().any(|r| &r.id == id))
+                .collect();
+            if !removed_repos.is_empty() {
+                self.db.remove(&removed_repos).await?;
+                info!(
+                    "removed {} unstarred repositories from index",
+                    removed_repos.len()
+                )
+            }
+        }
 
         let now = Local::now();
         let mut index_dates = self.db.get_index_dates().await?;

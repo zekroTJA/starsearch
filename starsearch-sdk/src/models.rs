@@ -20,6 +20,11 @@ pub struct Repository {
     pub disabled: bool,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct Id {
+    pub id: u32,
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct License {
     pub key: Option<String>,
