@@ -123,7 +123,10 @@ impl Database {
         Ok(res)
     }
 
-    pub async fn list_ids(&self) -> Result<Vec<u32>> {
+    pub async fn list_ids<T>(&self) -> Result<T>
+    where
+        T: FromIterator<u32>,
+    {
         let idx = self.client.index("repositories");
 
         let res = DocumentsQuery::new(&idx)
@@ -136,20 +139,6 @@ impl Database {
             .collect();
 
         Ok(res)
-    }
-
-    pub async fn get(&self, id: u32) -> Result<Option<Repository>> {
-        let idx = self.client.index("repositories");
-        let res = idx.get_document(&id.to_string()).await;
-        match res {
-            Ok(v) => Ok(Some(v)),
-            Err(meilisearch_sdk::errors::Error::Meilisearch(err))
-                if err.error_code == ErrorCode::DocumentNotFound =>
-            {
-                Ok(None)
-            }
-            Err(err) => Err(err.into()),
-        }
     }
 
     pub async fn remove(&self, ids: &[u32]) -> Result<()> {

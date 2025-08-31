@@ -11,6 +11,7 @@ use log::{debug, info};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use reqwest::IntoUrl;
 use starsearch_sdk::models::Repository;
+use std::collections::HashSet;
 use std::sync::Arc;
 
 const REPO_LIMIT: usize = 10_000;
@@ -53,6 +54,8 @@ impl Scraper {
 
         debug!("Scraping starred repos of user {}", &self.github_username);
 
+        let indexed_repos: HashSet<_> = self.db.list_ids().await?;
+
         'outer: loop {
             debug!("Scraping page {} ...", &page);
 
@@ -75,7 +78,7 @@ impl Scraper {
 
             if only_new {
                 for (idx, r) in res.iter().enumerate() {
-                    if self.db.get(r.id).await?.is_some() {
+                    if indexed_repos.contains(&r.id) {
                         repos.extend(res[..idx].iter().cloned());
                         break 'outer;
                     }
@@ -91,7 +94,7 @@ impl Scraper {
             page += 1;
         }
 
-        debug!("Finished scraping; {} repos fetched", repos.len());
+        info!("Finished scraping; {} repos fetched", repos.len());
 
         Ok(repos)
     }
@@ -166,7 +169,7 @@ impl Scraper {
         self.db.insert_repos(&repos).await?;
 
         if !fast {
-            let stored_repos = self.db.list_ids().await?;
+            let stored_repos: Vec<_> = self.db.list_ids().await?;
             let removed_repos: Vec<_> = stored_repos
                 .into_iter()
                 .filter(|id| !repos.iter().any(|r| &r.id == id))
@@ -174,7 +177,7 @@ impl Scraper {
             if !removed_repos.is_empty() {
                 self.db.remove(&removed_repos).await?;
                 info!(
-                    "removed {} unstarred repositories from index",
+                    "Removed {} unstarred repositories from index",
                     removed_repos.len()
                 )
             }
