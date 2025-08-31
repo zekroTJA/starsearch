@@ -1,4 +1,3 @@
-use rocket::figment::error::Result;
 use rocket::figment::providers::Env;
 use rocket::figment::Figment;
 use serde::Deserialize;
@@ -15,7 +14,10 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn parse() -> Result<Self> {
-        Figment::new().merge(Env::prefixed("SS_")).extract()
+    pub fn parse() -> Result<Self, Box<rocket::figment::Error>> {
+        Figment::new()
+            .merge(Env::prefixed("SS_"))
+            .extract()
+            .map_err(Box::new)
     }
 }

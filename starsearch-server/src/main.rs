@@ -18,6 +18,7 @@ extern crate rocket;
 const DEFAULT_SCRAPE_FAST_INTERVAL: u64 = 3500;
 const DEFAULT_SCRAPE_FULL_INTERVAL: u64 = 3600 * 12;
 
+#[allow(clippy::result_large_err)]
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
     dotenv::dotenv().ok();
