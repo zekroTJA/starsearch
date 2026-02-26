@@ -10,6 +10,11 @@ tasks:
   run-server:
     desc: Cargo run the backend server.
     aliases: [run]
+    dotenv:
+      - .env
+    preconditions:
+      - sh: test -f .env
+        msg: Please create a .env file from the .env.template
     cmds:
       - cargo run -p starsearch-server
 
