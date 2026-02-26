@@ -8,6 +8,7 @@ on:
     tags:
       - "*"
     paths-ignore:
+      - "starsearch-cli/**"
       - "**.md"
 
 jobs:
