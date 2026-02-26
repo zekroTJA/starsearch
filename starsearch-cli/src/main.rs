@@ -24,19 +24,19 @@ struct Args {
     query: Vec<String>,
 
     /// Filter by programming language.
-    #[arg(short, long)]
-    lang: Option<String>,
+    #[arg(short, long, alias = "lang")]
+    language: Option<String>,
 
     /// Maximum number of results shown.
     #[arg(short = 'n', long)]
     limit: Option<usize>,
 
     /// Display results in codensed mode.
-    #[arg(short, long)]
+    #[arg(short, long, visible_short_alias = 's', visible_alias = "short")]
     condensed: bool,
 
     /// Display results in detailed mode.
-    #[arg(short, long)]
+    #[arg(short, long, visible_alias = "long")]
     detailed: bool,
 
     /// The starsearch API endpoint.
@@ -44,11 +44,11 @@ struct Args {
     endpoint: Option<String>,
 
     /// Trigger a quick re-index on the server.
-    #[arg(long)]
+    #[arg(short, long)]
     refresh: bool,
 
     /// Dispaly server info.
-    #[arg(long)]
+    #[arg(short, long)]
     info: bool,
 }
 
@@ -105,7 +105,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let res = client.search(
         &args.query.join(" "),
-        args.lang.as_deref(),
+        args.language.as_deref(),
         args.limit
             .or(cfg.as_ref().and_then(|c| c.limit))
             .unwrap_or(5),
